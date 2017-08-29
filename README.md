@@ -1,4 +1,4 @@
-# Power ship
+# power_ship
 ## Objetivos
 Destruir o maximo de inimigos e não ser destruido.
 
