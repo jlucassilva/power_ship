@@ -1,6 +1,6 @@
 
 local composer = require( "composer" )
-
+local gameSpeed = 400
 local scene = composer.newScene()
 
 -- -----------------------------------------------------------------------------------
@@ -101,7 +101,7 @@ local function basicShot()
   newShot.y = ship.y
   newShot:toBack()
 
-  transition.to( newShot, {y=-250, time = 1100,
+  transition.to( newShot, {y=-250, time = 800,
   onComplete = function() display.remove( newShot ) end
 } )
 end
@@ -141,7 +141,7 @@ local function specialShoot( event )
 end
 
 local function gameLoop()
-  -- basicShot()
+  basicShot()
   createAsteroid()
 
   for i = #enemyTable, 1, -1 do
@@ -266,7 +266,7 @@ function scene:show( event )
 
     physics.start()
     Runtime:addEventListener("collision", onCollision)
-    gameLoopTimer = timer.performWithDelay( 1000, gameLoop, 0 )
+    gameLoopTimer = timer.performWithDelay( gameSpeed, gameLoop, 0 )
 
   end
 end
