@@ -11,9 +11,14 @@ local scene = composer.newScene()
 local physics = require("physics")
 physics.start()
 physics.setGravity(0, 0)
+physics.setReportCollisionsInContentCoordinates( true )
 
-local explosionSheetInfo = require("explosionSheet")
+local explosionBody
+local explosionSheetInfo = require( "explosionSheet" )
 local explosionSheet = graphics.newImageSheet( "explosionSheet.png", explosionSheetInfo:getSheet() )
+local explosionPhysicsData = ( require "explosionRadius" ).physicsData(1.0)
+
+
 
 local sequence_explosion = {
   {
@@ -45,7 +50,7 @@ local function createAsteroid()
   if ( spawnPoint == 1 ) then
     -- From the top position 1
     local contentWidth = (display.contentWidth/3)/2
-    print(contentWidth)
+    -- print(contentWidth)
     newEnemy.x = ( display.contentWidth/3)/2
     newEnemy.y = -60
     -- newEnemy:setLinearVelocity( math.random( -40,40 ), math.random( 40,120 ) )
@@ -111,6 +116,7 @@ local function specialShoot( event )
     if ( event.numTaps == 2 ) then
       local newSpecialShot = display.newImageRect( mainGroup, "blue_plazma.png", 33, 108)
 
+      --Add body to the bullet
       physics.addBody( newSpecialShot, "dynamic", { isSensor=true } )
       newSpecialShot.isBullet = true
       newSpecialShot.myName = "specialShoot"
@@ -123,25 +129,17 @@ local function specialShoot( event )
       onComplete = function() display.remove( newShot ) end
     } )
 
-  --   local animation = display.newSprite( explosionSheet, sequence_explosion )
-  --   animation.x = display.contentCenterX
-  --   animation.y = display.contentCenterY
-  --   animation:play()
-  --
-  --   local function animationListener( event )
-  --     if ( event.phase == "ended" ) then
-  --       animation:removeSelf()
-  --       animation = nil
-  --     end
-  --   end
-  --   animation:addEventListener("sprite", animationListener)
+    explosionBody = display.newCircle( 1,1, explosionPhysicsData:get("0007").radius )
+    explosionBody:setFillColor(1,1,1,1)
+    physics.addBody( explosionBody, "static", explosionPhysicsData:get("0007") )
+
   else
     return true
   end
 end
 
 local function gameLoop()
-  basicShot()
+  -- basicShot()
   createAsteroid()
 
   for i = #enemyTable, 1, -1 do
@@ -164,7 +162,7 @@ local function onCollision( event )
     local obj1 = event.object1
     local obj2 = event.object2
 
-    -- Laser and Enemy collision
+    --Collision between Laser and Enemy
     if ( ( obj1.myName == "laser" and obj2.myName == "enemy") or
          ( obj1.myName == "enemy" and obj2.myName == "laser" ))
          then
@@ -180,7 +178,7 @@ local function onCollision( event )
            end
     end
 
-    --SpecialShoot end Enemy collision
+    --Collision between SpecialShoot end Enemy
     if ( ( obj1.myName == "specialShoot" and obj2.myName == "enemy") or
          ( obj1.myName == "enemy" and obj2.myName == "specialShoot" ))
          then
@@ -189,9 +187,11 @@ local function onCollision( event )
            display.remove( obj2 )
 
            local animation = display.newSprite( explosionSheet, sequence_explosion )
-           animation.x = event.x
-           animation.y = event.y
+           animation.x = obj1.x
+           animation.y = obj2.y + ( obj1.y - obj2.y)/2
            animation:play()
+           explosionBody.x = 0
+           explosionBody.y = 0
 
            local function animationListener( event )
              if ( event.phase == "ended" ) then
