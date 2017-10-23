@@ -70,7 +70,6 @@ local function createAsteroid()
     -- newEnemy:setLinearVelocity( math.random( -40,40 ), math.random( 40,120 ) )
     newEnemy:setLinearVelocity( 0, 100 )
   end
-
 end
 
 local function dragShip(event)
@@ -129,9 +128,9 @@ local function specialShoot( event )
       onComplete = function() display.remove( newShot ) end
     } )
 
-    explosionBody = display.newCircle( 1,1, explosionPhysicsData:get("0007").radius )
-    explosionBody:setFillColor(1,1,1,1)
-    physics.addBody( explosionBody, "static", explosionPhysicsData:get("0007") )
+    -- explosionBody = display.newCircle( -1000, 1000, explosionPhysicsData:get("0007").radius )
+    -- explosionBody:setFillColor(0,0,0,0)
+    -- physics.addBody( explosionBody, "static", explosionPhysicsData:get("0007") )
 
   else
     return true
@@ -157,10 +156,66 @@ local function gameLoop()
 
 end
 
+local function onDelayedBlastCollision(self, event)
+  print( "waiting..."..event.target.myName)
+  print( "waiting..."..event.other.myName)
+
+  if( event.phase == "began" and self.myName == "explosion") then
+    local forcex = event.other.x-self.x
+    local forcey = event.other.y-self.y-20
+    if(forcex < 0) then
+        forcex = 0-(80 + forcex)-12
+    else
+        forcex = 80 - forcex+12
+    end
+    local obj1 = event.target
+    local obj2 = event.other
+    -- display.remove(obj1)
+    -- display.remove(obj2)
+    -- for i=#enemyTable, 1, -1 do
+    --   if (enemyTable[i] == obj1 or enemyTable[i] == obj2) then
+    --     table.remove( enemyTable, i )
+    --     break
+    --   end
+    -- end
+
+    event.other:applyForce( 10, 10, self.x, self.y )
+  end
+end
+
+local function iListen()
+  -- return function()
+    print( "waiting..."..explosionBody.myName )
+
+    physics.addBody( explosionBody, "static", explosionPhysicsData:get("0007") )
+    explosionBody.collision = onDelayedBlastCollision
+    explosionBody:addEventListener( "collision", explosionBody )
+  -- end
+end
+
+local function delayedBlast(event, animationX, animationY, animationWidth)
+  if( event.phase == "began") then
+    explosionBody = display.newCircle( animationX,animationY, animationWidth*2 )
+    explosionBody.myName = "explosion"
+    explosionBody:setFillColor(0,0,0,0)
+
+    physics.addBody( explosionBody, "dynamic", explosionPhysicsData:get("0007") )
+    -- explosionBody.isSensor = true
+    explosionBody.collision = onDelayedBlastCollision
+    explosionBody:addEventListener( "collision", explosionBody )
+  end
+  -- if( event.phase == "end") then
+  --   explosionBody:removeSelf()
+  -- end
+end
+
+
 local function onCollision( event )
   if ( event.phase == "began" ) then
     local obj1 = event.object1
     local obj2 = event.object2
+    -- print( "waiting..."..obj1.myName)
+    -- print( "waiting..."..obj2.myName)
 
     --Collision between Laser and Enemy
     if ( ( obj1.myName == "laser" and obj2.myName == "enemy") or
@@ -178,20 +233,20 @@ local function onCollision( event )
            end
     end
 
+
     --Collision between SpecialShoot end Enemy
     if ( ( obj1.myName == "specialShoot" and obj2.myName == "enemy") or
          ( obj1.myName == "enemy" and obj2.myName == "specialShoot" ))
          then
            --
            display.remove( obj1 )
-           display.remove( obj2 )
+          --  display.remove( obj2 )
 
            local animation = display.newSprite( explosionSheet, sequence_explosion )
            animation.x = obj1.x
            animation.y = obj2.y + ( obj1.y - obj2.y)/2
            animation:play()
-           explosionBody.x = 0
-           explosionBody.y = 0
+           timer.performWithDelay( 300,function() return delayedBlast(event, animation.x, animation.y, animation.contentWidth) end)
 
            local function animationListener( event )
              if ( event.phase == "ended" ) then
@@ -200,17 +255,38 @@ local function onCollision( event )
              end
            end
            animation:addEventListener("sprite", animationListener)
+           print( "waiting...")
 
-           for i=#enemyTable, 1, -1 do
-             if (enemyTable[i] == obj1 or enemyTable[i] == obj2) then
-               table.remove( enemyTable, i )
-               break
-             end
-           end
     end
+    --
+    -- if ( ( obj1.myName == "explosion" and obj2.myName == "enemy") or
+    --      ( obj1.myName == "enemy" and obj2.myName == "explosion" ))
+    --      then
+    --        print( "waiting...")
+    --
+    --       -- local forcex = event.other.x-self.x
+    --       -- local forcey = event.other.y-self.y-20
+    --       -- if(forcex < 0) then
+    --       --     forcex = 0-(80 + forcex)-12
+    --       -- else
+    --       --     forcex = 80 - forcex+12
+    --       -- end
+    --
+    --       display.remove(obj1)
+    --       display.remove(obj2)
+    --       for i=#enemyTable, 1, -1 do
+    --         if (enemyTable[i] == obj1 or enemyTable[i] == obj2) then
+    --           table.remove( enemyTable, i )
+    --           break
+    --         end
+    --       end
+    --       -- event.other:applyForce( forcex, forcey, self.x, self.y
+
+    -- end
 
   end
 end
+
 
 
 local function endGame()
@@ -284,7 +360,7 @@ function scene:hide( event )
 
   elseif ( phase == "did" ) then
     -- Code here runs immediately after the scene goes entirely off screen
-    -- Runtime:removeEventListener( "collision", onCollision )
+    Runtime:removeEventListener( "collision", onCollision )
     physics.pause()
     composer.removeScene("game")
 

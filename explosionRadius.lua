@@ -18,21 +18,45 @@ local M = {}
 
 function M.physicsData(scale)
 	local physics = { data =
-	{ 
-		
+	{
+		["0005"] = {
+
+
+
+										{
+										pe_fixture_id = "", density = 1, friction = 0, bounce = 0,
+										filter = { categoryBits = 1, maskBits = 65535, groupIndex = 0 },
+										radius = 32.001
+										}
+
+
+		},
+		["0006"] = {
+
+
+
+										{
+										pe_fixture_id = "", density = 1, friction = 0, bounce = 0,
+										filter = { categoryBits = 1, maskBits = 65535, groupIndex = 0 },
+										radius = 64.002
+										}
+
+
+		},
+
 		["0007"] = {
-                    
-                    
-                    
+
+
+
                     {
-                    pe_fixture_id = "", density = 2, friction = 0, bounce = 0, 
+                    pe_fixture_id = "", density = 1, friction = 0, bounce = 0,
                     filter = { categoryBits = 1, maskBits = 65535, groupIndex = 0 },
                     radius = 128.004
                     }
-                    
-                    
+
+
 		}
-		
+
 	} }
 
         -- apply scale factor
@@ -48,7 +72,7 @@ function M.physicsData(scale)
                     end
                 end
         end
-	
+
 	function physics:get(name)
 		return unpack(self.data[name])
 	end
@@ -56,9 +80,8 @@ function M.physicsData(scale)
 	function physics:getFixtureId(name, index)
                 return self.data[name][index].pe_fixture_id
 	end
-	
+
 	return physics;
 end
 
 return M
-
