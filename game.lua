@@ -174,7 +174,7 @@ local function onDelayedBlastCollision(self, event)
 
     event.other:applyForce( forcex/10,forcey/10,  self.x, self.y )
     local function neutralize()
-      if enemy!=nil then
+--       if enemy!=nil then
         --body...
         enemy:removeSelf()
         for i=#enemyTable, 1, -1 do
@@ -183,7 +183,7 @@ local function onDelayedBlastCollision(self, event)
             break
           end
         end
-      end
+--       end
       explosion:removeSelf()
 
     end
