@@ -127,11 +127,6 @@ local function specialShoot( event )
       transition.to( newSpecialShot, {y=-250, time = 1100,
       onComplete = function() display.remove( newShot ) end
     } )
-
-    -- explosionBody = display.newCircle( -1000, 1000, explosionPhysicsData:get("0007").radius )
-    -- explosionBody:setFillColor(0,0,0,0)
-    -- physics.addBody( explosionBody, "static", explosionPhysicsData:get("0007") )
-
   else
     return true
   end
@@ -160,26 +155,39 @@ local function onDelayedBlastCollision(self, event)
   print( "waiting..."..event.target.myName)
   print( "waiting..."..event.other.myName)
 
-  if( event.phase == "began" and self.myName == "explosion") then
+  if( event.phase == "began" and self.myName == "explosion")
+    and (event.other.myName=="enemy") then
+    print( "entrei..."..event.other.myName)
     local forcex = event.other.x-self.x
-    local forcey = event.other.y-self.y-20
-    if(forcex < 0) then
-        forcex = 0-(80 + forcex)-12
-    else
-        forcex = 80 - forcex+12
-    end
-    local obj1 = event.target
-    local obj2 = event.other
+    local forcey = event.other.y-self.y
+    -- if(forcex < 0) then
+    --     forcex = 0-(80 + forcex)-12
+    -- else
+    --     forcex = 80 - forcex+12
+    -- end
+    local explosion = event.target
+    local enemy = event.other
     -- display.remove(obj1)
     -- display.remove(obj2)
-    -- for i=#enemyTable, 1, -1 do
-    --   if (enemyTable[i] == obj1 or enemyTable[i] == obj2) then
-    --     table.remove( enemyTable, i )
-    --     break
-    --   end
-    -- end
 
-    event.other:applyForce( 10, 10, self.x, self.y )
+
+
+    event.other:applyForce( forcex/10,forcey/10,  self.x, self.y )
+    local function neutralize()
+      if enemy!=nil then
+        --body...
+        enemy:removeSelf()
+        for i=#enemyTable, 1, -1 do
+          if (enemyTable[i] == enemy) then
+            table.remove( enemyTable, i )
+            break
+          end
+        end
+      end
+      explosion:removeSelf()
+
+    end
+    timer.performWithDelay( 100, neutralize )
   end
 end
 
@@ -200,12 +208,12 @@ local function delayedBlast(event, animationX, animationY, animationWidth)
     explosionBody:setFillColor(0,0,0,0)
 
     physics.addBody( explosionBody, "dynamic", explosionPhysicsData:get("0007") )
-    -- explosionBody.isSensor = true
+    explosionBody.isSensor = true
     explosionBody.collision = onDelayedBlastCollision
     explosionBody:addEventListener( "collision", explosionBody )
   end
-  -- if( event.phase == "end") then
-  --   explosionBody:removeSelf()
+  -- if( event.phase == "ended") then
+    -- explosionBody:removeSelf()
   -- end
 end
 
@@ -255,8 +263,6 @@ local function onCollision( event )
              end
            end
            animation:addEventListener("sprite", animationListener)
-           print( "waiting...")
-
     end
     --
     -- if ( ( obj1.myName == "explosion" and obj2.myName == "enemy") or
