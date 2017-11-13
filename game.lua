@@ -214,6 +214,7 @@ local function onDelayedBlastCollision(self, event)
 
     if( event.phase == "began" and self.myName == "explosion")
     and (event.other.myName=="enemy") then
+<<<<<<< HEAD
         local forcex = event.other.x-self.x
         local forcey = event.other.y-self.y
 
@@ -232,6 +233,36 @@ local function onDelayedBlastCollision(self, event)
             display.remove( explosion )
         end
         timer.performWithDelay( 100, neutralize )
+=======
+    print( "entrei..."..event.other.myName)
+    local forcex = event.other.x-self.x
+    local forcey = event.other.y-self.y
+    -- if(forcex < 0) then
+    --     forcex = 0-(80 + forcex)-12
+    -- else
+    --     forcex = 80 - forcex+12
+    -- end
+    local explosion = event.target
+    local enemy = event.other
+    -- display.remove(obj1)
+    -- display.remove(obj2)
+
+
+
+    event.other:applyForce( forcex/10,forcey/10,  self.x, self.y )
+    local function neutralize()
+--       if enemy!=nil then
+        --body...
+        enemy:removeSelf()
+        for i=#enemyTable, 1, -1 do
+          if (enemyTable[i] == enemy) then
+            table.remove( enemyTable, i )
+            break
+          end
+        end
+--       end
+      explosion:removeSelf()
+>>>>>>> 5c76f3eb0cc7d74490bdfb7ae72c10c324eeea88
 
     end
     return true
