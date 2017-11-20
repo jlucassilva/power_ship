@@ -8,7 +8,10 @@ local scene = composer.newScene()
 -- the scene is removed entirely (not recycled) via "composer.removeScene()"
 -- -----------------------------------------------------------------------------------
 
+local buttonSound
+
 local function gotoGame()
+  audio.play( buttonSound )
   composer.gotoScene( "game", {time=800, effect="crossFade"} )
 end
 
@@ -30,7 +33,7 @@ function scene:create( event )
 	background.x = display.contentCenterX
 	background.y = display.contentCenterY
 
-	local title = display.newImageRect( sceneGroup, "titlep.png", 320, 80 )
+	local title = display.newImageRect( sceneGroup, "title.png", 320, 84 )
 	title.x = display.contentCenterX
 	title.y = 100
 
@@ -43,6 +46,7 @@ function scene:create( event )
 	playButton:addEventListener( "tap", gotoGame )
 	highScoresButton:addEventListener( "tap", gotoHighScores )
 
+  buttonSound = audio.loadSound( "audio/startGame.wav"  )
 
 end
 
